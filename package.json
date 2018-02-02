@@ -1,0 +1,35 @@
+{
+  "private": true,
+  "scripts": {
+    "dev-client": "parcel client/index.html -d dist/client -p 8888",
+    "dev-server": "parcel server/index.html -d dist/server -p 8080",
+    "build-client": "parcel build client/index.html -d dist/client --public-url ./ --no-cache",
+    "build-server": "parcel build server/index.html -d dist/server --public-url ./ --no-cache && mkdir -p dist/api && cp -R api/*.js dist/api",
+    "start-client": "yarn run build-client && http-server dist/client -o -s -c -1 -p 8888",
+    "start-server": "yarn run build-server && node dist/api/index.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "morgan": "^1.9.0",
+    "node-fetch": "^1.7.3",
+    "node-rsa": "^0.4.2",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-qr-reader": "^2.0.1",
+    "react-qr-svg": "^2.1.0",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "autoprefixer": "^7.2.5",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "http-server": "^0.11.1",
+    "node-sass": "^4.7.2",
+    "parcel-bundler": "^1.5.1",
+    "postcss-modules": "^1.1.0"
+  }
+}

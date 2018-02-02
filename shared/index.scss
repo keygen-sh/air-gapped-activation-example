@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css?family=Ubuntu+Mono:400|Ubuntu:300,400,700');
+
+html {
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Ubuntu', sans-serif;
+  text-align: center;
+  line-height: 1.5;
+  min-height: 100vh;
+  margin: 0;
+  background: #f7f8fb;
+}
+
+h1 {
+  user-select: none;
+  cursor: default;
+  position: relative;
+  color: #001331;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 2.5rem;
+  font-weight: 200;
+  line-height: 1.25;
+  margin: 0 auto 0.25em;
+  padding: 0 1rem;
+  max-width: 60rem;
+
+  @media (min-width: 40rem) {
+    font-size: 3rem;
+  }
+
+  @media (min-width: 60rem) {
+    font-size: 3.5rem;
+  }
+}
+
+p {
+  user-select: none;
+  cursor: default;
+  position: relative;
+  color: #8591a3;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 1rem;
+  font-weight: 200;
+  max-width: 30rem;
+  margin: 0 auto;
+}
+
+input {
+  font-family: 'Ubuntu Mono', monospace;
+  font-size: 1.25rem;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  width: 20rem;
+  background: #fff;
+  border: 1px solid #a7aeba;
+  border-radius: 2px;
+
+  &:focus {
+    border-color: #00f;
+    outline: 0;
+  }
+}
+
+button {
+  user-select: none;
+  cursor: pointer;
+  display: inline-block;
+  color: #0000ff;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.15;
+  margin: 0 0.25rem;
+  padding: 0.375em 1em;
+  background: none;
+  border: 2px solid currentColor;
+  border-radius: 1.5em;
+  outline: none;
+
+  &:disabled {
+    cursor: not-allowed;
+    color: #dee2ec;
+  }
+}
