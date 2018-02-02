@@ -6,7 +6,8 @@ it can also for example be used for desktop and on-premise software.
 
 > **This example application is not 100% production-ready**, but it should
 > get you 90% of the way there. You may need to add additional logging,
-> error handling, as well as a similar system for machine deactivation.
+> error handling, license activation persistence, as well as a similar
+> system for machine deactivation.
 
 ![image](https://user-images.githubusercontent.com/6979737/35715082-03a35cfc-0796-11e8-93a5-7013d77f0ea5.png)
 
@@ -110,6 +111,10 @@ Visit the following url: http://localhost:8888. Follow the instructions,
 using your mobile device to scan the initial QR code. In this example,
 the client respresents your application. You may perform the client
 operations while disconnected from the internet.
+
+Upon successful activation, you will see a new machine resource created
+in your Keygen account, and both the activated machine and mobile device
+will let you know that the activation was a success.
 
 ## Questions?
 
