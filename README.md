@@ -12,7 +12,21 @@ it can also for example be used for desktop and on-premise software.
 
 ## Running the example
 
-First up, configure a few environment variables:
+If you don't already have one, you can generate an RSA keypair using
+the commands below:
+
+#### Private key
+```bash
+openssl genrsa -out priv.pem 2048
+```
+
+#### Public key
+```bash
+openssl rsa -in priv.pem -out pub.pem -outform PEM -pubout
+```
+
+Once you've created a keypair, or if you already have one, configure
+a few environment variables:
 ```bash
 # RSA private key, 512-bit or higher (don't share this with anyone!)
 export RSA_PRIVATE_KEY=$(printf %b \
