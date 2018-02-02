@@ -7,7 +7,7 @@ class Server extends Component {
   statuses = {
     NOT_ATTEMPTED: 'NOT_ATTEMPTED',
     IN_PROGRESS: 'IN_PROGRESS',
-    VALID: 'VALID',
+    NOT_VALID: 'NOT_VALID',
     FAIL: 'FAIL',
     OK: 'OK'
   }
