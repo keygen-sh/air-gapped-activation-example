@@ -40,9 +40,8 @@ yarn start
 ```
 
 The server represents your activation server, hosted on your infrastructure.
-The server's frontend is backed by a simple activation API.
-
-The client represents your air-gapped software application.
+The server's frontend is backed by a simple activation API. The client
+represents your air-gapped software application.
 
 ## Configuring an air-gapped policy
 
