@@ -1,13 +1,8 @@
 import React, { Component } from 'react'
 import { QRCode } from 'react-qr-svg'
-import QRReader from 'react-qr-reader'
-import RSA from 'node-rsa'
 import uuidv4 from 'uuid/v4'
+import otplib from 'otplib/otplib-browser'
 import styles from './Client.scss'
-
-// Don't forget to set this env var!
-const { RSA_PUBLIC_KEY } = process.env
-const rsa = new RSA(RSA_PUBLIC_KEY, 'public', { environment: 'browser' })
 
 class Client extends Component {
   statuses = {
@@ -20,11 +15,11 @@ class Client extends Component {
     super(props)
 
     this.state = {
-      activationCode: this.getActivationCode(),
       fingerprint: this.getFingerprint(),
-      licenseKey: '',
-      qrPayload: '',
+      totp: '',
+      key: '',
       currentStep: 0,
+      qrPayload: '',
       status: this.statuses.NOT_ATTEMPTED
     }
   }
@@ -40,29 +35,24 @@ class Client extends Component {
       if (!fingerprint) {
         fingerprint = localStorage.fingerprint = uuidv4()
       }
-    } catch(e) {
-      console.error(e)
+    } catch (e) {
+      alert(`Failed to fingerprint device: ${e}`)
     }
 
     return fingerprint
   }
 
-  getActivationCode = () => {
-    return (Math.floor(Math.random() * 9e5) + 1e5).toString() // Random 6 digit code
-  }
-
   handleLicenseKeyChange = event => {
-    this.setState({ licenseKey: event.target.value })
+    this.setState({ key: event.target.value })
   }
 
   handleLicenseKeySubmit = event => {
     event.preventDefault()
 
-    const { currentStep, activationCode, fingerprint, licenseKey } = this.state
+    const { currentStep, fingerprint, key } = this.state
     const qrPayload = JSON.stringify({
-      activationCode,
       fingerprint,
-      licenseKey
+      key
     })
 
     this.setState({
@@ -71,18 +61,23 @@ class Client extends Component {
     })
   }
 
-  handleActivationSigScan = activationSig => {
-    if (activationSig == null) {
+  handleActivationCodeChange = event => {
+    this.setState({ totp: event.target.value })
+  }
+
+  handleActivationCodeSubmit = event => {
+    const { totp } = this.state
+    if (totp == null) {
       return
     }
 
-    const { currentStep, activationCode } = this.state
-
-    // Verify that the activation sig matches our activation code
+    const { currentStep } = this.state
     let ok = false
     try {
-      ok = rsa.verify(activationCode, activationSig, 'utf8', 'hex')
-    } catch(e) {}
+      ok = otplib.totp.check(totp.toString(), this.state.fingerprint)
+    } catch (e) {
+      alert(e)
+    }
 
     this.setState({
       currentStep: currentStep + 1,
@@ -91,7 +86,9 @@ class Client extends Component {
   }
 
   handleScanError = err => {
-    console.error(err)
+    alert(
+      JSON.stringify(err, null, 2)
+    )
   }
 
   handleGoToPrevStep = event => {
@@ -116,7 +113,7 @@ class Client extends Component {
 
     switch (currentStep) {
       case 0: {
-        const { licenseKey } = this.state
+        const { key } = this.state
 
         content = (
           <div>
@@ -124,7 +121,7 @@ class Client extends Component {
               Please enter your license key below to begin the activation process.
             </p>
             <form onSubmit={this.handleLicenseKeySubmit}>
-              <input type='text' value={licenseKey} onChange={this.handleLicenseKeyChange} />
+              <input type='text' value={key} onChange={this.handleLicenseKeyChange} />
               <p>
                 <small>Press enter to continue</small>
               </p>
@@ -135,7 +132,7 @@ class Client extends Component {
         break
       }
       case 1: {
-        const { qrPayload, fingerprint, activationSig } = this.state
+        const { qrPayload, fingerprint } = this.state
 
         content = (
           <div>
@@ -157,16 +154,19 @@ class Client extends Component {
         break
       }
       case 2: {
+        const { totp } = this.state
+
         content = (
           <div>
             <p>
-              Using a webcam, scan the QR code displayed on your mobile device to finish activating this machine.
+              Input the 6-digit activation code displayed on your mobile device.
             </p>
-            <div className={styles.QRReader}>
-              <QRReader
-                onScan={this.handleActivationSigScan}
-                onError={this.handleScanError} />
-            </div>
+            <form onSubmit={this.handleActivationCodeSubmit}>
+              <input type='number' value={totp} onChange={this.handleActivationCodeChange} />
+              <p>
+                <small>Press enter to continue</small>
+              </p>
+            </form>
           </div>
         )
 
@@ -174,6 +174,15 @@ class Client extends Component {
       }
       case 3: {
         const { status } = this.state
+        let button = null
+
+        if (status !== this.statuses.OK) {
+          button = (
+            <button type='button' onClick={this.handleGoToPrevStep}>
+              Back
+            </button>
+          )
+        }
 
         content = (
           <div>
@@ -182,6 +191,7 @@ class Client extends Component {
                 ? 'Machine has successfully been activated!'
                 : 'Failed to activate machine.'}
             </p>
+            {button}
           </div>
         )
 

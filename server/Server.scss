@@ -8,12 +8,18 @@
   padding: 1rem;
 }
 
-.QRCode {
+.QRReader {
   max-width: 20rem;
   margin: 2.5rem auto;
 }
 
-.QRReader {
-  max-width: 20rem;
+.TOTP {
+  color: #001331;
+  font-family: 'Ubuntu', sans-serif;
+  font-size: 2rem;
+  font-weight: 200;
+  text-align: center;
+  letter-spacing: 0.15rem;
+  line-height: 1.25;
   margin: 2.5rem auto;
 }

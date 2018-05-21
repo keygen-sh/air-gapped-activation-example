@@ -13,39 +13,10 @@ it can also for example be used for desktop and on-premise software.
 
 ## Running the example
 
-If you don't already have one, you can generate an RSA keypair using
-the commands below:
+First up, configure a few environment variables:
 
-#### Private key
 ```bash
-openssl genrsa -out priv.pem 2048
-```
-
-#### Public key
-```bash
-openssl rsa -in priv.pem -out pub.pem -outform PEM -pubout
-```
-
-Once you've created a keypair, or if you already have one, configure
-a few environment variables:
-```bash
-# RSA private key, 512-bit or higher (don't share this with anyone!)
-export RSA_PRIVATE_KEY=$(printf %b \
-  '-----BEGIN RSA PRIVATE KEY-----\n' \
-  'MIIBPAIBAAJBAKGB3pm05k4P3qMSDaVHo5WHFVBH+PMzQT2xTqK6pwxnBphwVhmp\n' \
-  # …
-  'mYvFqfj3Y9/+DMypt/le5NLYjAlJTL5kslAn3wufoeI=\n' \
-  '-----END RSA PRIVATE KEY-----')
-
-# RSA public key, 512-bit or higher (this will be used on the client)
-export RSA_PUBLIC_KEY=$(printf %b \
-  '-----BEGIN PUBLIC KEY-----\n' \
-  'zdL8BgMFM7p7+FGEGuH1I0KBaMcB/RZZSUu4yTBMu0pJw2EWzr3CrOOiXQI3+6bA\n' \
-  # …
-  'efK41Ml6OwZB3tchqGmpuAsCEwEAaQ==\n' \
-  '-----END PUBLIC KEY-----')
-
-# Keygen product token (don't share this!)
+# Keygen product token for server-side use only (don't share this!)
 export KEYGEN_PRODUCT_TOKEN="YOUR_KEYGEN_PRODUCT_TOKEN"
 
 # Your Keygen account ID
@@ -57,19 +28,21 @@ starting the app, or you can add the above contents to your `~/.bashrc`
 file and then run `source ~/.bashrc` after saving the file.
 
 Next, install dependencies with [`yarn`](https://yarnpkg.comg):
+
 ```
 yarn
 ```
 
-Then start the server:
+Then start the client and server:
+
 ```
-yarn run start-server
+yarn start
 ```
 
-Open a new terminal tab in the same directory and start the client:
-```
-yarn run start-client
-```
+The server represents your activation server, hosted on your infrastructure.
+The server's frontend is backed by a simple activation API.
+
+The client represents your air-gapped software application.
 
 ## Configuring an air-gapped policy
 
@@ -98,6 +71,7 @@ key later on during activation, so keep it handy.
 
 To access the activation server from a mobile device, create an [`ngrok`](https://ngrok.com)
 tunnel for the server:
+
 ```
 ngrok http 8080
 ```

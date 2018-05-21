@@ -2,19 +2,15 @@
 const {
   KEYGEN_PRODUCT_TOKEN,
   KEYGEN_ACCOUNT_ID,
-  RSA_PRIVATE_KEY,
   PORT = 8080
 } = process.env
 
 const fetch = require('node-fetch')
-const RSA = require('node-rsa')
-const crypto = require('crypto')
 const bodyParser = require('body-parser')
 const morgan = require('morgan')
 const path = require('path')
 const express = require('express')
 const app = express()
-const rsa = new RSA(RSA_PRIVATE_KEY)
 
 app.use(bodyParser.json({ type: 'application/vnd.api+json' }))
 app.use(bodyParser.json({ type: 'application/json' }))
@@ -27,11 +23,7 @@ app.set('views', __dirname)
 app.use('/', express.static(path.join(__dirname, '../server')))
 
 app.post('/api/activate', async (req, res) => {
-  const {
-    activationCode,
-    fingerprint,
-    licenseKey,
-  } = req.body
+  const { fingerprint, key } = req.body
 
   // Validate the provided license key within the scope of the current machine
   const validation = await fetch(`https://api.keygen.sh/v1/accounts/${KEYGEN_ACCOUNT_ID}/licenses/actions/validate-key`, {
@@ -44,7 +36,7 @@ app.post('/api/activate', async (req, res) => {
     body: JSON.stringify({
       meta: {
         scope: { fingerprint },
-        key: licenseKey
+        key
       }
     })
   })
@@ -84,7 +76,7 @@ app.post('/api/activate', async (req, res) => {
           })
         })
 
-        const { errors: errs1 } = await activation.json()
+        const { data: machine, errors: errs1 } = await activation.json()
         if (errs1) {
           return res.status(400).send({ errors: errs1 })
         }
@@ -100,7 +92,7 @@ app.post('/api/activate', async (req, res) => {
           body: JSON.stringify({
             meta: {
               scope: { fingerprint },
-              key: licenseKey
+              key
             }
           })
         })
@@ -124,10 +116,10 @@ app.post('/api/activate', async (req, res) => {
     }
   }
 
-  // Sign the activation code (we'll verify it client-side during activation)
-  const data = rsa.sign(activationCode, 'hex', 'utf8')
-
-  res.send({ meta, data })
+  res.send({
+    data: { fingerprint },
+    meta
+  })
 })
 
 process.on('unhandledRejection', err => {

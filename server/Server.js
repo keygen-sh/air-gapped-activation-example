@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
-import { QRCode } from 'react-qr-svg'
 import QRReader from 'react-qr-reader'
+import otplib from 'otplib/otplib-browser'
 import styles from './Server.scss'
 
 class Server extends Component {
@@ -16,10 +16,33 @@ class Server extends Component {
     super(props)
 
     this.state = {
+      fingerprint: '',
+      totp: '',
       qrPayload: '',
       currentStep: 0,
       status: this.statuses.NOT_ATTEMPTED
     }
+  }
+
+  generateTotpToken = () => {
+    const gen = () => {
+      const totp = otplib.totp.generate(this.state.fingerprint)
+
+      this.setState({ totp })
+    }
+
+    // Regenerate the TOTP every 30 seconds according to system clock
+    setInterval(() => {
+      const now = new Date()
+      const sec = now.getSeconds()
+      if (sec !== 0 && sec !== 30) {
+        return
+      }
+
+      gen()
+    }, 500)
+
+    return gen()
   }
 
   handleActivationCodeScan = async body => {
@@ -44,6 +67,7 @@ class Server extends Component {
     }
 
     this.setState({
+      fingerprint: data && data.fingerprint,
       status: meta.valid ? this.statuses.OK : this.statuses.NOT_VALID,
       res: { meta, data }
     })
@@ -52,16 +76,16 @@ class Server extends Component {
       setTimeout(() => {
         const { currentStep } = this.state
 
-        this.setState({
-          currentStep: currentStep + 1,
-          qrPayload: data // This contains our activation sig from our API
-        })
+        this.setState({ currentStep: currentStep + 1 })
+        this.generateTotpToken()
       }, 2500)
     }
   }
 
   handleScanError = err => {
-    console.error(err)
+    alert(
+      JSON.stringify(err, null, 2)
+    )
   }
 
   render() {
@@ -81,10 +105,10 @@ class Server extends Component {
             message = 'Activation in progress…'
             break
           case this.statuses.FAIL:
-            message = `Failed to activate machine due to one or more errors: ${res.errors.map(e => e.detail).join(', ')}`
+            message = `Failed to activate the machine due to one or more errors: ${res.errors.map(e => e.detail).join(', ')}`
             break
           case this.statuses.NOT_VALID:
-            message = `Failed to activate machine because the license ${res.meta.detail}.`
+            message = `Failed to activate the machine because the license key ${res.meta.detail}.`
             break
           case this.statuses.OK:
             message = 'Activation successful! Loading…'
@@ -110,15 +134,15 @@ class Server extends Component {
         break
       }
       case 1: {
-        const { qrPayload } = this.state
+        const { totp } = this.state
 
         content = (
           <div>
             <p>
-              To finish the activation process, scan this QR code from the machine you are activating.
+              To finish the activation process, press continue on the device you're activating and input the following activation code.
             </p>
-            <div className={styles.QRCode}>
-              <QRCode value={qrPayload} bgColor='#f7f8fb' fgColor='#001331' />
+            <div className={styles.TOTP}>
+              {totp}
             </div>
           </div>
         )
