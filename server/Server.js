@@ -24,9 +24,9 @@ class Server extends Component {
     }
   }
 
-  generateTotpToken = () => {
+  generateTotpToken = secret => {
     const gen = () => {
-      const totp = otplib.totp.generate(this.state.fingerprint)
+      const totp = otplib.totp.generate(secret)
 
       this.setState({ totp })
     }
@@ -52,6 +52,7 @@ class Server extends Component {
 
     this.setState({ status: this.statuses.IN_PROGRESS })
 
+    const { secret } = JSON.parse(body)
     const res = await fetch('/api/activate', {
       method: 'POST',
       headers: {
@@ -77,7 +78,7 @@ class Server extends Component {
         const { currentStep } = this.state
 
         this.setState({ currentStep: currentStep + 1 })
-        this.generateTotpToken()
+        this.generateTotpToken(secret)
       }, 2500)
     }
   }

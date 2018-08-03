@@ -16,6 +16,7 @@ class Client extends Component {
 
     this.state = {
       fingerprint: this.getFingerprint(),
+      secret: this.generateSecret(),
       totp: '',
       key: '',
       currentStep: 0,
@@ -42,6 +43,17 @@ class Client extends Component {
     return fingerprint
   }
 
+  generateSecret = (len = 64) => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+    let sk = ''
+
+    for (var i = 0; i < len; i++) {
+      sk += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+
+    return sk
+  }
+
   handleLicenseKeyChange = event => {
     this.setState({ key: event.target.value })
   }
@@ -49,9 +61,10 @@ class Client extends Component {
   handleLicenseKeySubmit = event => {
     event.preventDefault()
 
-    const { currentStep, fingerprint, key } = this.state
+    const { currentStep, fingerprint, secret, key } = this.state
     const qrPayload = JSON.stringify({
       fingerprint,
+      secret,
       key
     })
 
@@ -71,17 +84,18 @@ class Client extends Component {
       return
     }
 
-    const { currentStep } = this.state
+    const { currentStep, secret } = this.state
     let ok = false
     try {
-      ok = otplib.totp.check(totp.toString(), this.state.fingerprint)
+      ok = otplib.totp.check(totp, secret)
     } catch (e) {
       alert(e)
     }
 
     this.setState({
       currentStep: currentStep + 1,
-      status: ok ? this.statuses.OK : this.statuses.FAIL
+      status: ok ? this.statuses.OK : this.statuses.FAIL,
+      secret: null
     })
   }
 
