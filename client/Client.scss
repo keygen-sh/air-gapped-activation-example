@@ -24,3 +24,20 @@
   max-width: 20rem;
   margin: 2.5rem auto;
 }
+
+.TOTPInput {
+  display: block;
+  max-width: 20rem;
+  margin: 0 auto;
+
+  // Hide arrows for numeric input field
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type=number] {
+    -moz-appearance: textfield;
+  }
+}

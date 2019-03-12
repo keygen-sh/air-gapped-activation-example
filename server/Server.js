@@ -3,6 +3,25 @@ import QRReader from 'react-qr-reader'
 import otplib from 'otplib/otplib-browser'
 import styles from './Server.scss'
 
+const TOTPSpinner = ({ timer }) =>
+  <div className={styles.TOTPSpinner}>
+    <svg viewBox='0 0 36 36'>
+      <path d='M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831' />
+      <path
+        d='M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831'
+        stroke-dasharray={`${timer}, 100`}
+      />
+    </svg>
+  </div>
+
+const TOTPCode = ({ totp, timer }) =>
+  <div className={styles.TOTP}>
+    <div className={styles.TOTPCode}>
+      {totp}
+    </div>
+    <TOTPSpinner timer={timer} />
+  </div>
+
 class Server extends Component {
   statuses = {
     NOT_ATTEMPTED: 'NOT_ATTEMPTED',
@@ -18,10 +37,22 @@ class Server extends Component {
     this.state = {
       fingerprint: '',
       totp: '',
+      timer: 0,
       qrPayload: '',
       currentStep: 0,
       status: this.statuses.NOT_ATTEMPTED
     }
+
+    // Update TOTP timer according to system clock
+    setInterval(() => {
+      const now = new Date()
+      let sec = now.getSeconds() + (now.getMilliseconds() / 1000)
+      if (sec > 30) {
+        sec -= 30
+      }
+
+      this.setState({ timer: sec / 30 * 100 })
+    }, 50)
   }
 
   generateTotpToken = secret => {
@@ -135,16 +166,14 @@ class Server extends Component {
         break
       }
       case 1: {
-        const { totp } = this.state
+        const { totp, timer } = this.state
 
         content = (
           <div>
             <p>
               To finish the activation process, press continue on the device you're activating and input the following activation code.
             </p>
-            <div className={styles.TOTP}>
-              {totp}
-            </div>
+            <TOTPCode totp={totp} timer={timer} />
           </div>
         )
 

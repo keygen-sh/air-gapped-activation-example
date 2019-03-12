@@ -4,6 +4,14 @@ import uuidv4 from 'uuid/v4'
 import otplib from 'otplib/otplib-browser'
 import styles from './Client.scss'
 
+const TOTPInput = ({ onChange, totp }) =>
+  <input
+    className={styles.TOTPInput}
+    onChange={onChange}
+    value={totp}
+    type='number'
+  />
+
 class Client extends Component {
   statuses = {
     NOT_ATTEMPTED: 'NOT_ATTEMPTED',
@@ -79,12 +87,14 @@ class Client extends Component {
   }
 
   handleActivationCodeSubmit = event => {
+    event.preventDefault()
+
     const { totp } = this.state
     if (totp == null) {
       return
     }
 
-    const { currentStep, secret } = this.state
+    let { currentStep, secret } = this.state
     let ok = false
     try {
       ok = otplib.totp.check(totp, secret)
@@ -92,10 +102,15 @@ class Client extends Component {
       alert(e)
     }
 
+    // Clear secret when successful
+    if (ok) {
+      secret = null
+    }
+
     this.setState({
       currentStep: currentStep + 1,
       status: ok ? this.statuses.OK : this.statuses.FAIL,
-      secret: null
+      secret,
     })
   }
 
@@ -176,7 +191,7 @@ class Client extends Component {
               Input the 6-digit activation code displayed on your mobile device.
             </p>
             <form onSubmit={this.handleActivationCodeSubmit}>
-              <input type='number' value={totp} onChange={this.handleActivationCodeChange} />
+              <TOTPInput totp={totp} onChange={this.handleActivationCodeChange} />
               <p>
                 <small>Press enter to continue</small>
               </p>
