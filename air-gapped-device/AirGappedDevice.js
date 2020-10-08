@@ -79,7 +79,7 @@ class AirGappedDevice extends Component {
   handleActivationProofSubmit = event => {
     event.preventDefault()
 
-    const { step, proof, fingerprint } = this.state
+    const { step, proof, key, fingerprint } = this.state
     if (proof == null) {
       return
     }
@@ -100,6 +100,11 @@ class AirGappedDevice extends Component {
       // current device's fingerprint (you can add additional checks here)
       const decodedData = atob(encodedData)
       const data = JSON.parse(decodedData)
+
+      if (data.license.key !== key) {
+        throw new Error(`license key does not match activation proof`)
+      }
+
       if (data.machine.fingerprint !== fingerprint) {
         throw new Error(`device fingerprint does not match activation proof`)
       }
