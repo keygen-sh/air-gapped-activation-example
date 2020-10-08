@@ -1,35 +1,36 @@
 import React, { Component } from 'react'
 import { QRCode } from 'react-qr-svg'
 import uuidv4 from 'uuid/v4'
-import otplib from 'otplib/otplib-browser'
-import styles from './Client.scss'
+import RSA from 'node-rsa'
+import styles from './AirGappedDevice.css'
 
-const TOTPInput = ({ onChange, totp }) =>
-  <input
-    className={styles.TOTPInput}
-    onChange={onChange}
-    value={totp}
-    type='number'
-  />
+// Don't forget to set this env var!
+const { KEYGEN_PUBLIC_KEY } = process.env
+const rsa = new RSA(KEYGEN_PUBLIC_KEY, 'public', { environment: 'browser' })
 
-class Client extends Component {
+class AirGappedDevice extends Component {
   statuses = {
     NOT_ATTEMPTED: 'NOT_ATTEMPTED',
     FAIL: 'FAIL',
     OK: 'OK'
   }
 
+  steps = {
+    INPUT_LICENSE_KEY: 0,
+    SCAN_QR_CODE: 1,
+    INPUT_PROOF: 2,
+  }
+
   constructor(props) {
     super(props)
 
     this.state = {
+      status: this.statuses.NOT_ATTEMPTED,
+      qrCodePayload: null,
       fingerprint: this.getFingerprint(),
-      secret: this.generateSecret(),
-      totp: '',
-      key: '',
-      currentStep: 0,
-      qrPayload: '',
-      status: this.statuses.NOT_ATTEMPTED
+      key: null,
+      proof: null,
+      step: 0,
     }
   }
 
@@ -51,17 +52,6 @@ class Client extends Component {
     return fingerprint
   }
 
-  generateSecret = (len = 64) => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    let sk = ''
-
-    for (var i = 0; i < len; i++) {
-      sk += chars.charAt(Math.floor(Math.random() * chars.length))
-    }
-
-    return sk
-  }
-
   handleLicenseKeyChange = event => {
     this.setState({ key: event.target.value })
   }
@@ -69,48 +59,60 @@ class Client extends Component {
   handleLicenseKeySubmit = event => {
     event.preventDefault()
 
-    const { currentStep, fingerprint, secret, key } = this.state
-    const qrPayload = JSON.stringify({
+    const { step, fingerprint, secret, key } = this.state
+    const payload = JSON.stringify({
       fingerprint,
       secret,
       key
     })
 
     this.setState({
-      currentStep: currentStep + 1,
-      qrPayload
+      qrCodePayload: btoa(payload),
+      step: step + 1,
     })
   }
 
-  handleActivationCodeChange = event => {
-    this.setState({ totp: event.target.value })
+  handleActivationProofChange = event => {
+    this.setState({ proof: event.target.value })
   }
 
-  handleActivationCodeSubmit = event => {
+  handleActivationProofSubmit = event => {
     event.preventDefault()
 
-    const { totp } = this.state
-    if (totp == null) {
+    const { step, proof, fingerprint } = this.state
+    if (proof == null) {
       return
     }
 
-    let { currentStep, secret } = this.state
     let ok = false
     try {
-      ok = otplib.totp.check(totp, secret)
-    } catch (e) {
-      alert(e)
-    }
+      // Extract dataset and signature from the activation proof string
+      const [signingData, encodedSig] = proof.split('.')
+      const [
+        signingPrefix,
+        encodedData,
+      ] = signingData.split('/')
+      if (signingPrefix !== 'proof') {
+        throw new Error(`activation proof format is invalid`)
+      }
 
-    // Clear secret when successful
-    if (ok) {
-      secret = null
+      // Decode the data and ensure that the activation fingerprint matches our
+      // current device's fingerprint (you can add additional checks here)
+      const decodedData = atob(encodedData)
+      const data = JSON.parse(decodedData)
+      if (data.machine.fingerprint !== fingerprint) {
+        throw new Error(`device fingerprint does not match activation proof`)
+      }
+
+      ok = rsa.verify(`proof/${encodedData}`, encodedSig, 'utf8', 'base64')
+    } catch (e) {
+      alert(`Proof verification error: ${e.message}`)
     }
 
     this.setState({
-      currentStep: currentStep + 1,
+      step: step + 1,
       status: ok ? this.statuses.OK : this.statuses.FAIL,
-      secret,
+      proof,
     })
   }
 
@@ -124,7 +126,7 @@ class Client extends Component {
     event.preventDefault()
 
     this.setState({
-      currentStep: Math.max(0, this.state.currentStep - 1)
+      step: Math.max(0, this.state.step - 1)
     })
   }
 
@@ -132,19 +134,19 @@ class Client extends Component {
     event.preventDefault()
 
     this.setState({
-      currentStep: this.state.currentStep + 1
+      step: this.state.step + 1
     })
   }
 
   render() {
-    const { currentStep } = this.state
-    let content
+    const { step } = this.state
+    let html = null
 
-    switch (currentStep) {
-      case 0: {
+    switch (step) {
+      case this.steps.INPUT_LICENSE_KEY: {
         const { key } = this.state
 
-        content = (
+        html = (
           <div>
             <p>
               Please enter your license key below to begin the activation process.
@@ -160,20 +162,20 @@ class Client extends Component {
 
         break
       }
-      case 1: {
-        const { qrPayload, fingerprint } = this.state
+      case this.steps.SCAN_QR_CODE: {
+        const { qrCodePayload } = this.state
 
-        content = (
+        html = (
           <div>
             <p>
-              Scan this QR code using the scanner on your mobile device.
+              Scan this QR code using the Activation Portal's scanner on your mobile device.
             </p>
             <div className={styles.QRCode}>
-              <QRCode value={qrPayload} bgColor='#f7f8fb' fgColor='#001331' />
-              <small>
-                {fingerprint}
-              </small>
+              <QRCode value={qrCodePayload} bgColor='#f7f8fb' fgColor='#001331' />
             </div>
+            <pre className={styles.QRCodeDataset}>
+              <code>{qrCodePayload}</code>
+            </pre>
             <button type='button' onClick={this.handleGoToNextStep}>
               Continue
             </button>
@@ -182,16 +184,16 @@ class Client extends Component {
 
         break
       }
-      case 2: {
-        const { totp } = this.state
+      case this.steps.INPUT_PROOF: {
+        const { proof } = this.state
 
-        content = (
+        html = (
           <div>
             <p>
-              Input the 6-digit activation code displayed on your mobile device.
+              Input the activation proof displayed on your mobile device.
             </p>
-            <form onSubmit={this.handleActivationCodeSubmit}>
-              <TOTPInput totp={totp} onChange={this.handleActivationCodeChange} />
+            <form onSubmit={this.handleActivationProofSubmit}>
+              <input type='text' value={proof} onChange={this.handleActivationProofChange} />
               <p>
                 <small>Press enter to continue</small>
               </p>
@@ -213,7 +215,7 @@ class Client extends Component {
           )
         }
 
-        content = (
+        html = (
           <div>
             <p>
               {status === this.statuses.OK
@@ -229,16 +231,16 @@ class Client extends Component {
     }
 
     return (
-      <div className={styles.Client}>
+      <div className={styles.AirGappedDevice}>
         <main>
           <h1>
-            Air-gapped Activation Client
+            Air-gapped Client
           </h1>
-          {content}
+          {html}
         </main>
       </div>
     )
   }
 }
 
-export default Client
+export default AirGappedDevice

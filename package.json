@@ -1,17 +1,20 @@
 {
   "private": true,
+  "engines": {
+    "node": "^12.19.0"
+  },
   "scripts": {
-    "build-api": "mkdir -p dist/api && cp -R api/*.js dist/api",
-    "start-client": "parcel client/index.html -d dist/client -p 8888",
-    "start-server": "concurrently 'parcel watch server/index.html -d dist/server --public-url ./ --no-hmr --no-cache' 'chokidar api/index.js -c \"yarn run build-api\"' 'nodemon dist/api/index.js'",
-    "start": "concurrently 'yarn run build-api' 'yarn run start-server' 'yarn run start-client'"
+    "start-activation-api": "nodemon activation-api/index.js",
+    "start-activation-portal": "parcel watch activation-portal/index.html -d dist/activation-portal --public-url ./ --no-cache --no-hmr",
+    "start-air-gapped-device": "parcel serve air-gapped-device/index.html -d dist/air-gapped-device -p 4000",
+    "start": "concurrently 'yarn run start-activation-api' 'yarn run start-activation-portal' 'yarn run start-air-gapped-device'"
   },
   "dependencies": {
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "morgan": "^1.9.0",
     "node-fetch": "^1.7.3",
-    "otplib": "^9.0.0",
+    "node-rsa": "^1.1.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-qr-reader": "^2.0.1",
@@ -20,17 +23,17 @@
   },
   "devDependencies": {
     "autoprefixer": "^7.2.5",
+    "babel-core": "^6.26.3",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
-    "chokidar-cli": "^1.2.0",
     "concurrently": "^3.5.1",
     "http-server": "^0.11.1",
-    "node-sass": "^4.7.2",
-    "nodemon": "^1.17.4",
+    "nodemon": "^2.0.4",
     "parcel-bundler": "^1.5.1",
-    "postcss-modules": "^1.1.0"
+    "postcss-modules": "^1.1.0",
+    "sass": "^1.27.0"
   }
 }

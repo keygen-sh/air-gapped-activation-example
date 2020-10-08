@@ -31,12 +31,16 @@ h1 {
   margin: 0 auto 0.25em;
   padding: 0 1rem;
   max-width: 60rem;
+}
 
-  @media (min-width: 40rem) {
+@media (min-width: 40rem) {
+  h1 {
     font-size: 3rem;
   }
+}
 
-  @media (min-width: 60rem) {
+@media (min-width: 60rem) {
+  h1 {
     font-size: 3.5rem;
   }
 }
@@ -62,11 +66,11 @@ input {
   background: #fff;
   border: 1px solid #a7aeba;
   border-radius: 2px;
+}
 
-  &:focus {
-    border-color: #00f;
-    outline: 0;
-  }
+input:focus {
+  border-color: #00f;
+  outline: 0;
 }
 
 button {
@@ -83,9 +87,23 @@ button {
   border: 2px solid currentColor;
   border-radius: 1.5em;
   outline: none;
+}
 
-  &:disabled {
-    cursor: not-allowed;
-    color: #dee2ec;
-  }
+button:disabled {
+  cursor: not-allowed;
+  color: #dee2ec;
+}
+
+pre {
+  font-size: 0.75rem;
+  text-align: left;
+  overflow: hidden;
+}
+
+pre code {
+  display: block;
+  padding: 0.5rem 1rem;
+  background: #ebeff7;
+  border-radius: 4px;
+  overflow: auto;
 }
