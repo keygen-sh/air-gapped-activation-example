@@ -16,7 +16,7 @@ app.use(bodyParser.json({ type: 'application/vnd.api+json' }))
 app.use(bodyParser.json({ type: 'application/json' }))
 app.use(morgan('combined'))
 
-// Serve static files from public server directory
+// Serve static files for activation portal frontend
 app.use('/', express.static(path.join(__dirname, '../dist/activation-portal')))
 
 async function validateLicenseKeyAndFingerprint(key, fingerprint) {
