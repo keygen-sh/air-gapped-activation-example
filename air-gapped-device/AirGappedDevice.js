@@ -109,14 +109,15 @@ class AirGappedDevice extends Component {
         throw new Error(`device fingerprint does not match activation proof`)
       }
 
+      // Cryptographically verify the activation proof
       ok = rsa.verify(`proof/${encodedData}`, encodedSig, 'utf8', 'base64')
     } catch (e) {
       alert(`Proof verification error: ${e.message}`)
     }
 
     this.setState({
-      step: step + 1,
       status: ok ? this.statuses.OK : this.statuses.FAIL,
+      step: step + 1,
       proof,
     })
   }
