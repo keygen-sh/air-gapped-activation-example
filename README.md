@@ -15,7 +15,7 @@ it can also for example be used for desktop and on-premise software.
 
 In general, the example setup requires a server to host the QR code scanner portal app. When your software is booted and it has not yet been activated, it will display a QR code which must be scanned from the mobile device to continue. The QR code has some data encoded into it such as the machine’s `fingerprint` (e.g. HDD ID, MAC address, etc.), which will be used to activate the machine for the current license from the mobile device (which has an internet connection and can communicate with the Keygen API).
 
-After successful activation, the activation portal will display [an "activation proof"](https://keygen.sh/docs/api#machines-actions-generate-offline-proof) — a cryptographically signed payload that will be verified on the air-gapped device to complete the activation process
+After successful activation, the activation portal will display [an "activation proof"](https://keygen.sh/docs/api#machines-actions-generate-offline-proof) — a cryptographically signed payload that will be verified on the air-gapped device to complete the activation process. You can deliver the proof from the mobile device to the air-gapped device via email, USB flash drive, dongle, etc.
 
 After activation, you can store an activation flag somewhere in the device's environment/registry/cache (so they’re not prompted again on next software boot), and you can also do whatever needs to be done to prep it for another activation at a pre-defined interval e.g. store a `reactivation-required-at` timestamp in a registry, which is queried periodically to determine if a reactivation is needed, in which case this activation process is restarted.
 
