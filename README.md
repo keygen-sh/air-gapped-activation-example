@@ -114,6 +114,36 @@ Upon successful activation, you will see a new machine resource created
 in your Keygen account, and both the activated machine and mobile device
 will let you know that the activation was a success.
 
+## Troubleshooting
+
+### Error: `input was not a public key`
+
+You likely haven't configured your public key correctly via the `KEYGEN_PUBLIC_KEY` environment
+variable. This error is thrown by Node when a public key is missing or incorrectly
+formatted.
+
+Try hard-coding your account's PEM-encoded RSA public key, like so, ensuring the formatting
+is exact:
+
+```js
+const KEYGEN_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAzPAseDYupK78ZUaSbGw7
+YyUCCeKo/1XqTACOcmTTHHGgeHacLK2j9UrbTlhW5h8Vyo0iUEHrY1Kgf4wwiGgF
+h0Yc+oDWDhq1bIertI03AE420LbpUf6OTioX+nY0EInxXF3J7aAdx/R/nYgRJrLZ
+9ATWaQVSgf3vtxCtCwUeKxKZI41GA/9KHTcCmd3BryAQ1piYPr+qrEGf2NDJgr3W
+vVrMtnjeoordAaCTyYKtfm56WGXeXr43dfdejBuIkI5kqSzwVyoxhnjE/Rj6xks8
+ffH+dkAPNwm0IpxXJerybjmPWyv7iyXEUN8CKG+6430D7NoYHp/c991ZHQBUs59g
+vwIDAQAB
+-----END PUBLIC KEY-----`
+```
+
+Alternatively, it may be easier to use your base64-encoded RSA public key, to avoid
+any formatting errors:
+
+```js
+const KEYGEN_PUBLIC_KEY = Buffer.from(encodedPublicKey, 'base64')
+```
+
 ## Questions?
 
 Reach out at [support@keygen.sh](mailto:support@keygen.sh) if you have any
