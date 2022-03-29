@@ -1,0 +1,12 @@
+@use '../shared/index.scss';
+
+.file-drop {
+  margin: 1rem 0;
+}
+
+.file-drop-target {
+  padding: 1rem;
+  background: #e9f0f2;
+  border-radius: 8px;
+  cursor: pointer;
+}
