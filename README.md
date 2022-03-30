@@ -1,6 +1,6 @@
 # Air-gapped Activation Example
 
-This is an example client/server implementation for air-gapped license activation. Essentially, the client displays a QR code which is read by the server, and the server will perform an activation request on behalf of the air-gapped client. The server will [validate][validate], [activate][activate], and finally [check-out][check-out] a license file. Lastly, the client will cryptographically verify and decrypt the license file.
+This is an example client/server implementation for air-gapped license activation. Essentially, the client displays a QR code which is read by the server, and the server will perform an activation request on behalf of the air-gapped client. The server will [validate][validate], [activate][activate], and finally [check-out][check-out] a license file. Lastly, once the license file is distributed to the client, the client can cryptographically verify and decrypt the license file.
 
 ![image](https://user-images.githubusercontent.com/6979737/160709628-16e8231e-6510-454e-b188-d20f7c4ff9dc.png)
 
@@ -17,7 +17,7 @@ Here's a detailed outline of the entire air-gapped licensing flow:
 1. The client will cryptographically verify the file using Ed25519.
 1. The client will decrypt the file using AES-256-GCM.
 
-**This example application is not 100% production-ready and only serves as an example implementation**
+**This example application is not 100% production-ready and only serves as an example implementation.**
 
 ## Running the example
 
