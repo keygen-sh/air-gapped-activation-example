@@ -81,7 +81,7 @@ export default function() {
       const handleSuccess = ({ meta, data }) => {
         setLicenseId(data.id)
 
-        switch (meta.constant) {
+        switch (meta.code) {
           case 'FINGERPRINT_SCOPE_MISMATCH':
           case 'NO_MACHINES':
           case 'NO_MACHINE':
