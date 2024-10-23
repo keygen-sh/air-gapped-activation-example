@@ -1,7 +1,7 @@
 # Air-gapped Activation Example
 
  > [!IMPORTANT] 
- > **Looking for a way to activate node-locked licenses offline, without human interaction?** Take a look at [Keygen Relay](https://github.com/keygen-sh/keygen-relay), a small on-premise licensing server we developed for distributing crytographically signed and encrypted license files to nodes on an air-gapped network.
+ > **Looking for a way to activate node-locked licenses offline, without human interaction?** Take a look at [Keygen Relay](https://github.com/keygen-sh/keygen-relay), a small on-premise licensing server we developed for distributing crytographically signed and encrypted license files to nodes in an air-gapped network.
 
 This is an example client/server implementation for air-gapped license activation. Essentially, the client displays a QR code which is read by the server, and the server will perform an activation request on behalf of the air-gapped client. The server will [validate][validate], [activate][activate], and finally [check-out][check-out] a license file. Lastly, once the license file is distributed to the client, the client can cryptographically verify and decrypt the license file.
 
